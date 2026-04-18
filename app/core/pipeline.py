@@ -43,7 +43,33 @@ class TrackerPipeline:
         
         for frame in self.video_handler.read_frames():
             detections = self.detector.detect(frame)
-            tracks = self.tracker.update(detections)
+            
+            # --- STRICT TRACKER INTEGRATION LAYER ---
+            # 1. Adapt native pipeline Dictionaries into strict Math Array lists for the Tracker securely
+            tracker_input = [
+                [det['bbox'][0], det['bbox'][1], det['bbox'][2], det['bbox'][3], det['confidence'], det['class_id']]
+                for det in detections
+            ]
+            
+            # 2. Safely Process and Assign IDs 
+            tracker_output = self.tracker.update(tracker_input)
+            
+            # 3. Reload back into native pipeline Dictionaries to feed CSV Writer & Visualization seamlessly
+            tracks = []
+            for item in tracker_output:
+                base_dict = {
+                    "bbox": [item[0], item[1], item[2], item[3]],
+                    "confidence": item[4],
+                    "class_id": item[5],
+                    "class_name": "person" if item[5] == 0 else "sports ball"
+                }
+                # Check dynamically if ByteTracker appended the unique 7th element (track_id)
+                if len(item) == 7:
+                    base_dict["track_id"] = item[6]
+                    
+                tracks.append(base_dict)
+            # -----------------------------------------
+            
             self.csv_writer.log_frame_data(frame_idx, tracks)
             
             annotated_frame = self.annotator.draw(frame, tracks)

@@ -40,6 +40,13 @@ class CsvWriter:
             return
             
         df = pd.DataFrame(self.data_store)
+        
+        # Explicit Safety Requirement: Avoid Duplicate Rows
+        df = df.drop_duplicates(subset=['frame_id', 'track_id'], keep='first')
+        
+        # Sort chronologically by timeline then entity ID securely
+        df = df.sort_values(by=['frame_id', 'track_id'])
+        
         df.to_csv(self.output_path, index=False)
         print(f"Tracking data metrics exported successfully to {self.output_path}")
 
