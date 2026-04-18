@@ -1,0 +1,21 @@
+video:
+  input_path: "data/input/sample.mp4"
+  output_path: "data/output/annotated_sample.mp4"
+
+detection:
+  model_name: "yolov8n.pt" 
+  confidence_threshold: 0.3
+  classes: [0, 32] 
+
+tracking:
+  track_activation_threshold: 0.25 
+  track_buffer: 30                 
+  match_thresh: 0.8                
+  fps: 30                          
+
+output:
+  csv_metrics_path: "data/output/tracking_data.csv"
+  csv_summary_path: "data/output/distance_summary.csv"
+  
+optional_features:
+  enable_emotion_detection: true   # Set to True to enable the lightweight emotion pipeline
